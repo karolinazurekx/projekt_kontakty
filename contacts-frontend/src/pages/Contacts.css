@@ -1,0 +1,215 @@
+/* Layout helpers for Contacts page to avoid overlapping and control wrapping */
+
+/* --- theme / variables --- */
+:root {
+    --shadow-weak: 0 4px 10px rgba(15, 23, 42, 0.06);
+    --shadow-hover: 0 14px 40px rgba(15, 23, 42, 0.10);
+    --shadow-btn: 0 6px 18px rgba(15, 23, 42, 0.08);
+    --ease-sm: cubic-bezier(.2,.9,.3,1);
+    --card-radius: 8px;
+}
+
+/* --- basic layout from previous version --- */
+.actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.actions .btn {
+    white-space: nowrap;
+    transition: transform 160ms var(--ease-sm), box-shadow 160ms var(--ease-sm), opacity 160ms linear;
+}
+
+/* subtle button hover lift */
+.actions .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-btn);
+}
+
+/* pressed state */
+.actions .btn:active {
+    transform: translateY(-1px) scale(0.998);
+}
+
+/* Search + Add row - responsive */
+.search-add-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.search-add-row .form-control {
+    flex: 1 1 420px;
+    min-width: 200px;
+}
+
+.search-add-row .add-btn {
+    flex: 0 0 220px;
+    max-width: 100%;
+    white-space: nowrap;
+}
+
+/* Contact card improvements */
+.contact-card {
+    min-height: 96px;
+    overflow: hidden;
+
+    /* visual */
+    border-radius: var(--card-radius);
+    background: #fff;
+    box-shadow: var(--shadow-weak);
+    transition: transform 220ms var(--ease-sm), box-shadow 220ms var(--ease-sm);
+    will-change: transform, box-shadow, opacity;
+
+    /* animation on mount */
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fadeUp 360ms var(--ease-sm) forwards;
+}
+
+/* make cards slightly lift on hover */
+.contact-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* Ensure flex children can shrink properly (avoid overflow/overlap) */
+.contact-card .flex-grow-1 {
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* Headline and text truncation if too long */
+.contact-card h5 {
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.contact-card .text-muted,
+.contact-card .small {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Avatar sizing and preventing shrink */
+.avatar {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 22px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    transition: transform 220ms var(--ease-sm), box-shadow 220ms var(--ease-sm);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* avatar small hover pop (keeps subtle) */
+.contact-card:hover .avatar {
+    transform: translateY(-4px) scale(1.02);
+}
+
+/* Make action buttons column not shrink */
+.contact-card .d-flex.flex-column {
+    flex-shrink: 0;
+}
+
+/* Button micro-interactions inside card */
+.contact-card .btn {
+    transition: transform 120ms var(--ease-sm), box-shadow 120ms var(--ease-sm), background-color 120ms linear;
+}
+
+.contact-card .btn:active {
+    transform: translateY(0) scale(0.995);
+}
+
+/* focus outlines for accessibility */
+.contact-card .btn:focus {
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+    outline: none;
+}
+
+/* phone row */
+.phone-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: inherit;
+    margin-top: 4px;
+}
+
+/* phone icon styling */
+.phone-icon {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    opacity: 0.85;
+    transition: transform 160ms var(--ease-sm), opacity 160ms var(--ease-sm);
+}
+
+/* increase icon contrast on card hover */
+.contact-card:hover .phone-icon {
+    transform: translateY(-2px);
+    opacity: 1;
+}
+
+/* --- animation keyframes --- */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger animation a bit for visual polish */
+.row.g-3 > div:nth-child(1) .contact-card { animation-delay: 20ms; }
+.row.g-3 > div:nth-child(2) .contact-card { animation-delay: 60ms; }
+.row.g-3 > div:nth-child(3) .contact-card { animation-delay: 100ms; }
+.row.g-3 > div:nth-child(4) .contact-card { animation-delay: 140ms; }
+.row.g-3 > div:nth-child(5) .contact-card { animation-delay: 180ms; }
+.row.g-3 > div:nth-child(6) .contact-card { animation-delay: 220ms; }
+/* items after that will naturally continue without explicit delay */
+
+/* Mobile tweaks */
+@media (max-width: 767.98px) {
+    .search-add-row .add-btn {
+        flex-basis: 100%;
+    }
+
+    .actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .contact-card {
+        padding: 0.85rem;
+    }
+
+    .avatar {
+        width: 56px;
+        height: 56px;
+    }
+}
+
+/* Optional: dark mode support (if your app switches themes via data-bs-theme attribute) */
+:root[data-bs-theme="dark"] .contact-card {
+    background: #111318;
+    color: #e6eef8;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+:root[data-bs-theme="dark"] .contact-card .text-muted {
+    color: #9aa8b9;
+}
