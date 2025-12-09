@@ -15,7 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * JwtAuthFilter
+
  * - S: tylko obsługa nagłówka Authorization / ustawienie Authentication
  * - D: zależności wstrzykiwane przez konstruktor (JwtService interface, UserDetailsService)
  */
