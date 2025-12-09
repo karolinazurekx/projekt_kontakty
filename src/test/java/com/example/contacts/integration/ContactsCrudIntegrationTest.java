@@ -20,8 +20,8 @@ import java.util.Map;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-// These tests assume JwtService is wired and /auth/login returns a Bearer token that can be used.
-// They perform basic create/read/update/delete flows for a user.
+//testy Get
+//Testy wykonują podstawowe operacje tworzenia/odczytu/aktualizacji/usuwania użytkownika.
 @SpringBootTest(classes = ContactsApplication.class)
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase

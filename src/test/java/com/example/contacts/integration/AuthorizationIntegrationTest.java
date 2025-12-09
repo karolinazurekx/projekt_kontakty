@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-// Uwaga: testy integracyjne uruchamiane są z pełnym kontekstem Spring Boot
+// testy post
 @SpringBootTest(classes = ContactsApplication.class)
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase
