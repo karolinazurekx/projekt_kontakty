@@ -23,12 +23,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.List;
 
-/**
- * SecurityConfig
- * - S (Single Responsibility): konfiguracja security - tylko to.
- * - D (Dependency Inversion): wstrzykujemy JwtAuthFilter/UserDetailsService zamiast tworzyć je tu.
- * - I (Interface Segregation): udostępnia tylko niezbędne beany (SecurityFilterChain, AuthenticationProvider, itp.).
- */
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -39,7 +34,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // S: pojedyncza odpowiedzialność - enkodowanie haseł
         return new BCryptPasswordEncoder();
     }
 
@@ -48,7 +42,6 @@ public class SecurityConfig {
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder
     ) {
-        // S: tworzy provider, nie miesza z inną logiką
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
@@ -68,17 +61,24 @@ public class SecurityConfig {
             throws Exception {
 
         http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**").disable())
+
+                .csrf(csrf -> csrf.disable())
+
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .authorizeHttpRequests(auth -> auth
+
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/login", "/auth/register", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+
+                        .requestMatchers("/auth/login", "/auth/register", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/auth/me").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(provider)
+                // add JWT filter before UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
