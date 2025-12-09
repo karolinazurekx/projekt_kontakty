@@ -13,8 +13,8 @@ import java.util.List;
 /**
  * ContactController
  * - S: mapping HTTP -> wywołania serwisu
- * - D: używa abstrakcji ContactService
- * - I: expose tylko potrzebne operacje
+ * - D: używa abstrakcji ContactService (odwrocenie zaleznosci)
+ * - I:  tylko potrzebne operacje
  */
 @RestController
 @RequestMapping("/api/contacts")
