@@ -5,7 +5,7 @@ import com.example.contacts.model.Contact;
 import java.util.List;
 
 /**
- * Interfejs ContactService
+
  * - I: segreguje API operacji na kontaktach
  * - D: kontrolery zależą od tej abstrakcji
  */
