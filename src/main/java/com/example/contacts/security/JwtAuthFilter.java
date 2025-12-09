@@ -74,7 +74,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (JwtException e) {
-            // zły / przeterminowany token → czyścimy kontekst i traktujemy jak niezalogowanego
+
             SecurityContextHolder.clearContext();
         }
 
