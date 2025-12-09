@@ -3,7 +3,7 @@ package com.example.contacts.security;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
- * Interfejs JwtService
+
  * - D (Dependency Inversion): konsumenci zależą od abstrakcji
  * - I (Interface Segregation): tylko metody potrzebne do pracy z tokenem
  */

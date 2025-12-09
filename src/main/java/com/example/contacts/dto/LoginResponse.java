@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
- * DTO: LoginResponse
+
  * - S: opakowanie tokenu w odpowiedzi
  */
 @Data

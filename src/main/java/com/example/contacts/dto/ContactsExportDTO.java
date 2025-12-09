@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * DTO do eksportu/importu XML
+
  * - S: odpowiedzialność - transformacja/transport danych.
  */
 @Data
