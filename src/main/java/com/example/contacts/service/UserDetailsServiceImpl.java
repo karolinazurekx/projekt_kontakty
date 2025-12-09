@@ -8,6 +8,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/**
+ * UserDetailsServiceImpl
+ * - S: tłumaczy AppUser -> Spring Security UserDetails
+ * - D: repozytorium wstrzyknięte przez konstruktor
+ */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
@@ -25,7 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         return User.withUsername(user.getUsername())
                 .password(user.getPassword())
-                .roles(user.getRole().replace("ROLE_", "")) // konwersja ROLE_USER → USER
+                .roles(user.getRole().replace("ROLE_", "")) // ROLE_USER -> USER
                 .build();
     }
 }
