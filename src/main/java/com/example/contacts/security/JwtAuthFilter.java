@@ -36,7 +36,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
 
-        // (nie pomijamy /auth/me — ten musi być filtrowany, żeby token został odczytany)
+
         return "/auth/login".equals(path) || "/auth/register".equals(path);
     }
 
