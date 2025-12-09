@@ -4,12 +4,15 @@ import com.example.contacts.model.Contact;
 import com.example.contacts.service.ContactService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/contacts")
+@Validated
 public class ContactController {
 
     private final ContactService contactService;
@@ -35,14 +38,14 @@ public class ContactController {
 
     // POST: dodaj kontakt – zawsze przypisany do zalogowanego
     @PostMapping
-    public ResponseEntity<Contact> add(@RequestBody Contact contact) {
+    public ResponseEntity<Contact> add(@Valid @RequestBody Contact contact) {
         Contact saved = contactService.addContact(contact);
         return ResponseEntity.ok(saved);
     }
 
     // PUT: aktualizuj kontakt – user tylko swoje, admin dowolny
     @PutMapping("/{id}")
-    public ResponseEntity<Contact> update(@PathVariable Long id, @RequestBody Contact contact) {
+    public ResponseEntity<Contact> update(@PathVariable Long id, @Valid @RequestBody Contact contact) {
         Contact updated = contactService.updateContact(id, contact);
         if (updated == null) {
             return ResponseEntity.notFound().build();
@@ -75,7 +78,7 @@ public class ContactController {
     }
 
     @PostMapping("/import/json")
-    public ResponseEntity<?> importJson(@RequestBody List<Contact> contacts) throws Exception {
+    public ResponseEntity<?> importJson(@Valid @RequestBody List<@Valid Contact> contacts) throws Exception {
         contactService.replaceContacts(contacts);
         return ResponseEntity.ok("Imported JSON");
     }

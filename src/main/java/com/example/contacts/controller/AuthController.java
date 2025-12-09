@@ -10,9 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -54,6 +57,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
+        // Najpierw sprawdź czy user istnieje — unika NoSuchElementException w testach/integracji
+        var optUser = userRepository.findByUsername(request.getUsername());
+        if (optUser.isEmpty()) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+
         try {
             authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -65,12 +74,12 @@ public class AuthController {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        var user = userRepository.findByUsername(request.getUsername()).get();
+        var user = optUser.get();
         var jwt = jwtService.generateToken(
-                new org.springframework.security.core.userdetails.User(
+                new User(
                         user.getUsername(),
                         user.getPassword(),
-                        java.util.List.of(() -> user.getRole())
+                        List.of(() -> user.getRole())
                 )
         );
 
@@ -80,6 +89,9 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> me() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
         return ResponseEntity.ok(
                 java.util.Map.of(
                         "username", auth.getName(),

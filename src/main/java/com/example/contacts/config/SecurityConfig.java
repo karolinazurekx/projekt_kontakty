@@ -60,15 +60,23 @@ public class SecurityConfig {
             throws Exception {
 
         http
-                .csrf(csrf -> csrf.disable())
+                // CSRF wyłączamy TYLKO dla /h2-console/**
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/h2-console/**")
+                        .disable()
+                )
 
-                // włączamy obsługę CORS z bean CorsConfigurationSource
+                // CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
+
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+
                 .authorizeHttpRequests(auth -> auth
-                        // zawsze przepuszczamy preflighty
+                        // preflight OPTIONS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                        // login, rejestracja i dokumentacja API – dostęp publiczny
                         .requestMatchers(
                                 "/auth/login",
                                 "/auth/register",
@@ -76,10 +84,13 @@ public class SecurityConfig {
                                 "/swagger-ui/**"
                         ).permitAll()
 
-                        // /auth/me wymaga uwierzytelnienia
+                        // konsola H2 (pełny dostęp)
+                        .requestMatchers("/h2-console/**").permitAll()
+
+                        // /auth/me – wymaga autoryzacji
                         .requestMatchers("/auth/me").authenticated()
 
-                        // reszta wymaga logowania
+                        // reszta endpointów
                         .anyRequest().authenticated()
                 )
 
@@ -89,16 +100,11 @@ public class SecurityConfig {
         return http.build();
     }
 
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-
-        // W dev użycie allowedOriginPatterns("*") rozwiązuje problemy z różnymi hostami (localhost/127.0.0.1)
-        // Jeśli chcesz ograniczyć dostęp, zamień poniższe na dokładne adresy.
         config.setAllowedOriginPatterns(List.of("*"));
-
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization", "Content-Type"));

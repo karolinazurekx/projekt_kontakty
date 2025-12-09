@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface ContactRepository extends JpaRepository<Contact, Long> {
     List<Contact> findByOwnerUsername(String ownerUsername);
+
     long deleteByOwnerUsername(String ownerUsername);
 }
