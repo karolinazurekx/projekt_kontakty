@@ -10,13 +10,16 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * DTO do eksportu/importu XML
+ * - S: odpowiedzialność - transformacja/transport danych.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @JacksonXmlRootElement(localName = "contacts")
 public class ContactsExportDTO {
 
-    // każdy kontakt będzie reprezentowany jako <contact>...</contact> wewnątrz <contacts>
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "contact")
     private List<Contact> contacts;

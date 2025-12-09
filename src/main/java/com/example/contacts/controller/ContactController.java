@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.util.List;
 
+/**
+ * ContactController
+ * - S: mapping HTTP -> wywołania serwisu
+ * - D: używa abstrakcji ContactService
+ * - I: expose tylko potrzebne operacje
+ */
 @RestController
 @RequestMapping("/api/contacts")
 @Validated
@@ -20,13 +26,12 @@ public class ContactController {
     public ContactController(ContactService contactService) {
         this.contactService = contactService;
     }
-    // GET: wszystkie kontakty zalogowanego użytkownika (admin: wszystkie)
+
     @GetMapping
     public List<Contact> getAll() {
         return contactService.getAllContacts();
     }
 
-    // GET: pojedynczy kontakt (user: tylko swój, admin: każdy)
     @GetMapping("/{id}")
     public ResponseEntity<Contact> getOne(@PathVariable Long id) {
         Contact contact = contactService.getContact(id);
@@ -36,14 +41,12 @@ public class ContactController {
         return ResponseEntity.ok(contact);
     }
 
-    // POST: dodaj kontakt – zawsze przypisany do zalogowanego
     @PostMapping
     public ResponseEntity<Contact> add(@Valid @RequestBody Contact contact) {
         Contact saved = contactService.addContact(contact);
         return ResponseEntity.ok(saved);
     }
 
-    // PUT: aktualizuj kontakt – user tylko swoje, admin dowolny
     @PutMapping("/{id}")
     public ResponseEntity<Contact> update(@PathVariable Long id, @Valid @RequestBody Contact contact) {
         Contact updated = contactService.updateContact(id, contact);
@@ -53,19 +56,15 @@ public class ContactController {
         return ResponseEntity.ok(updated);
     }
 
-    // DELETE: user usuwa swoje, admin każdy
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         boolean deleted = contactService.deleteContact(id);
         if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
-            // 404 – albo nie istnieje, albo nie jest Twój (dla usera)
             return ResponseEntity.notFound().build();
         }
     }
-
-    // EXPORT / IMPORT
 
     @GetMapping(value = "/export/json", produces = MediaType.APPLICATION_JSON_VALUE)
     public String exportJson() throws Exception {

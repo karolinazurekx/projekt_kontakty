@@ -15,8 +15,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Optional;
 
+/**
+ * AuthController
+ * - S: odpowiada jedynie za REST endpoints związane z auth
+ * - D: zależy od abstrakcji JwtService (interfejs)
+ * - O: można dodać dodatkowe endpointy (np. refresh token) bez modyfikacji istniejących
+ */
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -38,8 +44,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+        Optional<AppUser> maybe = userRepository.findByUsername(request.getUsername());
+        if (maybe.isPresent()) {
             return ResponseEntity.badRequest().body("Username already exists");
         }
 
@@ -50,38 +56,28 @@ public class AuthController {
                 .build();
 
         userRepository.save(user);
-
         return ResponseEntity.ok("User registered");
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-
-        // Najpierw sprawdź czy user istnieje — unika NoSuchElementException w testach/integracji
-        var optUser = userRepository.findByUsername(request.getUsername());
-        if (optUser.isEmpty()) {
-            return ResponseEntity.status(401).body("Invalid credentials");
-        }
-
         try {
             authManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
-                            request.getPassword()
-                    )
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        var user = optUser.get();
-        var jwt = jwtService.generateToken(
-                new User(
-                        user.getUsername(),
-                        user.getPassword(),
-                        List.of(() -> user.getRole())
-                )
-        );
+        var user = userRepository.findByUsername(request.getUsername()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+
+        var jwt = jwtService.generateToken(User.withUsername(user.getUsername())
+                .password(user.getPassword())
+                .authorities(() -> user.getRole())
+                .build());
 
         return ResponseEntity.ok(new LoginResponse(jwt));
     }
@@ -89,15 +85,9 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> me() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) {
-            return ResponseEntity.status(401).body("Unauthorized");
-        }
-        return ResponseEntity.ok(
-                java.util.Map.of(
-                        "username", auth.getName(),
-                        "role", auth.getAuthorities().iterator().next().getAuthority()
-                )
-        );
+        return ResponseEntity.ok(java.util.Map.of(
+                "username", auth.getName(),
+                "role", auth.getAuthorities().iterator().next().getAuthority()
+        ));
     }
-
 }

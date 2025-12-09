@@ -3,6 +3,10 @@ package com.example.contacts.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Encja AppUser
+ * - S: model/dane użytkownika
+ */
 @Entity
 @Table(name = "users")
 @Data

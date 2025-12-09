@@ -9,6 +9,10 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Konfiguracja OpenAPI (Swagger)
+ * - SRP: klasa odpowiada wyłącznie za konfigurację dokumentacji API.
+ */
 @Configuration
 public class OpenAPIConfig {
 
@@ -21,9 +25,7 @@ public class OpenAPIConfig {
                         .version("1.0.0")
                         .license(new License().name("MIT License"))
                 )
-                // Dodajemy security do wszystkich endpointów
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
-                // Definiujemy schemat JWT Bearer
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth",
                                 new SecurityScheme()

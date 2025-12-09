@@ -23,6 +23,12 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * SecurityConfig
+ * - S (Single Responsibility): konfiguracja security - tylko to.
+ * - D (Dependency Inversion): wstrzykujemy JwtAuthFilter/UserDetailsService zamiast tworzyć je tu.
+ * - I (Interface Segregation): udostępnia tylko niezbędne beany (SecurityFilterChain, AuthenticationProvider, itp.).
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -33,6 +39,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+        // S: pojedyncza odpowiedzialność - enkodowanie haseł
         return new BCryptPasswordEncoder();
     }
 
@@ -41,6 +48,7 @@ public class SecurityConfig {
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder
     ) {
+        // S: tworzy provider, nie miesza z inną logiką
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
@@ -60,40 +68,16 @@ public class SecurityConfig {
             throws Exception {
 
         http
-                // CSRF wyłączamy TYLKO dla /h2-console/**
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/h2-console/**")
-                        .disable()
-                )
-
-                // CORS
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**").disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
-
                 .authorizeHttpRequests(auth -> auth
-                        // preflight OPTIONS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // login, rejestracja i dokumentacja API – dostęp publiczny
-                        .requestMatchers(
-                                "/auth/login",
-                                "/auth/register",
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**"
-                        ).permitAll()
-
-                        // konsola H2 (pełny dostęp)
+                        .requestMatchers("/auth/login", "/auth/register", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-
-                        // /auth/me – wymaga autoryzacji
                         .requestMatchers("/auth/me").authenticated()
-
-                        // reszta endpointów
                         .anyRequest().authenticated()
                 )
-
                 .authenticationProvider(provider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

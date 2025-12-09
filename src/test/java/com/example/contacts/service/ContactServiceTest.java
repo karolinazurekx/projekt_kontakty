@@ -1,7 +1,6 @@
 package com.example.contacts.service;
 
 import com.example.contacts.TestSecurityUtils;
-import com.example.contacts.dto.ContactsExportDTO;
 import com.example.contacts.model.AppUser;
 import com.example.contacts.model.Contact;
 import com.example.contacts.repository.ContactRepository;
@@ -13,10 +12,14 @@ import org.junit.jupiter.api.*;
 import org.mockito.*;
 import org.springframework.security.access.AccessDeniedException;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 
 class ContactServiceTest {
 
@@ -29,14 +32,17 @@ class ContactServiceTest {
     @Mock
     Validator validator;
 
+    // Inject concrete implementation so Mockito może utworzyć instancję i wstrzyknąć mocki
     @InjectMocks
-    ContactService contactService;
+    ContactServiceImpl contactService;
 
     AutoCloseable mocks;
 
     @BeforeEach
     void setup() {
         mocks = MockitoAnnotations.openMocks(this);
+        // Zawsze zwracamy pusty zestaw naruszeń walidacji w testach jednostkowych
+        when(validator.validate(Mockito.any())).thenReturn(Collections.emptySet());
     }
 
     @AfterEach
@@ -104,6 +110,7 @@ class ContactServiceTest {
     void addContact_userAddsContact() {
         TestSecurityUtils.setAuthentication("charlie", "ROLE_USER");
         Contact toAdd = Contact.builder().firstName("X").lastName("Y").email("x@y").phone("123456789").build();
+
         when(contactRepository.save(any())).thenAnswer(inv -> {
             Contact c = inv.getArgument(0);
             c.setId(10L);

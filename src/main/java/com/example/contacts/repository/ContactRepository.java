@@ -5,6 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
+/**
+ * Repozytorium dla kontaków
+ * - S: dostęp do DB
+ */
 public interface ContactRepository extends JpaRepository<Contact, Long> {
     List<Contact> findByOwnerUsername(String ownerUsername);
 

@@ -1,7 +1,7 @@
 package com.example.contacts.security;
 
-import org.junit.jupiter.api.*;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -9,21 +9,24 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * Testy JwtService - teraz testujemy konkretną implementację JwtServiceImpl.
+ * Po refaktoryzacji JwtService jest interfejsem (D - Dependency Inversion),
+ * dlatego w testach tworzymy instancję JwtServiceImpl.
+ */
 class JwtServiceTest {
 
     JwtService jwtService;
 
     @BeforeEach
     void setup() {
-        jwtService = new JwtService();
-        // 256-bit base64 secret (przykład)
-        String secret = "dGhpc2lzbXlzZWNyZXRmb3J0ZXN0aW5nc2hvdWxkYmU0bG9uZw=="; // base64
-        ReflectionTestUtils.setField(jwtService, "jwtSecret", secret);
-        ReflectionTestUtils.setField(jwtService, "jwtExpiration", 1000L * 60 * 60); // 1h
+        // Base64 secret przykładowy (256-bit). W produkcji trzymaj w bezpiecznym miejscu.
+        String secret = "dGhpc2lzbXlzZWNyZXRmb3J0ZXN0aW5nc2hvdWxkYmU0bG9uZw==";
+        long expiration = 1000L * 60 * 60; // 1 godzina
+        // Tworzymy implementację bez Springa, bez ReflectionTestUtils
+        jwtService = new JwtServiceImpl(secret, expiration);
     }
 
-
-    // 1. generate token and extract username
     @Test
     void generateAndExtractUsername() {
         UserDetails ud = User.withUsername("john").password("x").roles("USER").build();
@@ -33,17 +36,14 @@ class JwtServiceTest {
         assertThat(username).isEqualTo("john");
     }
 
-    // 2. token expiration is honored (expiration > now)
     @Test
     void tokenHasValidExpiration() {
         UserDetails ud = User.withUsername("anna").password("x").roles("USER").build();
         String token = jwtService.generateToken(ud);
-        // extraction should not throw
-        String username = jwtService.extractUsername(token);
-        assertThat(username).isEqualTo("anna");
+        Date issuedAt = jwtService.extractClaim(token, claims -> claims.getIssuedAt());
+        assertThat(issuedAt).isNotNull();
     }
 
-    // 3. extractClaim works
     @Test
     void extractClaim_subject() {
         UserDetails ud = User.withUsername("u").password("x").roles("USER").build();
@@ -52,14 +52,13 @@ class JwtServiceTest {
         assertThat(issuedAt).isNotNull();
     }
 
-    // 4. malformed token throws (we expect a runtime from jjwt)
     @Test
     void malformedToken_throws() {
         String bad = "not.a.jwt";
-        assertThatThrownBy(() -> jwtService.extractUsername(bad)).isInstanceOf(Exception.class);
+        assertThatThrownBy(() -> jwtService.extractUsername(bad))
+                .isInstanceOf(Exception.class);
     }
 
-    // 5. another username
     @Test
     void differentUserNameIsEncoded() {
         UserDetails ud = User.withUsername("marie").password("x").roles("USER").build();
@@ -67,7 +66,6 @@ class JwtServiceTest {
         assertThat(jwtService.extractUsername(token)).isEqualTo("marie");
     }
 
-    // 6. tokens differ for different issue times
     @Test
     void tokensAreUniquePerIssueTime() {
         UserDetails ud = User.withUsername("sam").password("x").roles("USER").build();
