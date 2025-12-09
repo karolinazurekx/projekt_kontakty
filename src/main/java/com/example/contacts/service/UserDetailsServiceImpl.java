@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 /**
- * UserDetailsServiceImpl
+
  * - S: tłumaczy AppUser -> Spring Security UserDetails
  * - D: repozytorium wstrzyknięte przez konstruktor
  */
