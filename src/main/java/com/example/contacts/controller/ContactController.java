@@ -60,7 +60,7 @@ public class ContactController {
         if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
-            // 404 – albo nie istnieje, albo nie jest Twój (dla usera)
+
             return ResponseEntity.notFound().build();
         }
     }
