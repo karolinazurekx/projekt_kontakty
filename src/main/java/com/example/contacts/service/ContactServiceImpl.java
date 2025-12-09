@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * ContactServiceImpl
+
  * - S: logika biznesowa dotyczaca kontaktów
  * - D: zależy od abstrakcji repozytoriów (ContactRepository, UserRepository)
  * - O: można rozszerzyć zachowanie przez dekoratory / proxy
